@@ -5,3 +5,34 @@ body {
 input::placeholder {
     color: #aaa;
 }
+
+.register-card {
+    border-radius: 14px;
+    transition: all 0.3s ease;
+}
+
+.register-card:hover {
+    transform: translateY(-3px);
+}
+
+.user-card {
+    background: linear-gradient(135deg, #3b6cb7, #4a7dd1);
+    color: white;
+}
+
+.user-card p {
+    color: #e0e8ff;
+}
+
+.provider-card {
+    background: #f8f9fa;
+}
+
+.icon-box {
+    font-size: 32px;
+}
+
+.arrow {
+    font-size: 22px;
+    font-weight: bold;
+}
