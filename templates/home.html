@@ -1,85 +1,220 @@
-{% extends "layout.html" %}
+{% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Home | Service Booking{% endblock %}
+{% block title %}Home - Smart Service Booking{% endblock %}
 
-{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+<style>
+/* Override base.css for home page */
+body {
+    display: block !important;
+    background: white !important;
+    align-items: unset !important;
+    justify-content: unset !important;
+}
+</style>
+{% endblock %}
 
-<!-- HERO SECTION -->
-<div class="row align-items-center bg-white rounded-4 shadow-sm p-5">
+{% block body_content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <h1>
+        <i class="bi bi-calendar-check"></i>Smart Service Booking
+    </h1>
+    <p class="hero-subtitle">Find the Best Service Providers for Your Needs</p>
 
-    <!-- LEFT CONTENT -->
-    <div class="col-md-6">
-        <h1 class="fw-bold mb-3">
-            Find the Best Service Providers for Your Needs
-        </h1>
+    <!-- Search Box -->
+    <form action="{% url 'search_services' %}" method="GET" class="search-box">
+        <input type="text" name="q" placeholder="Search for services, providers, or categories..." id="searchInput">
+        <button type="submit" class="btn-search">
+            <i class="bi bi-search"></i> Search
+        </button>
+    </form>
 
-        <p class="text-muted mb-4">
-            Describe what you need, and our AI will recommend the best service providers for you.
-        </p>
+    <!-- CTA Buttons -->
+    <div class="cta-buttons">
+        <a href="{% url 'browse_providers' %}" class="btn-cta btn-browse">
+            <i class="bi bi-grid-3x3-gap"></i> Browse Providers
+        </a>
+        <a href="{% url 'register_provider' %}" class="btn-cta btn-provider">
+            <i class="bi bi-briefcase"></i> Become a Provider
+        </a>
+    </div>
+</section>
 
-        <!-- AI SEARCH FORM -->
-        <form method="get" action="/providers/">
-            <div class="input-group input-group-lg mb-3">
-                <input
-                    type="text"
-                    name="q"
-                    class="form-control"
-                    placeholder="I need a math tutor for class 10 exams"
-                >
-                <button class="btn btn-success" type="submit">
-                    Get Recommendations
-                </button>
+<!-- Popular Categories Section -->
+{% if popular_categories %}
+<section class="categories-section">
+    <div class="container">
+        <h2>Popular Categories</h2>
+        <p class="section-subtitle">Explore our most requested services</p>
+
+        <div class="categories-grid">
+            {% for category in popular_categories %}
+            <a href="{% url 'browse_providers' %}?category={{ category.value }}" class="category-card">
+                <div class="category-icon">
+                    {% if category.value == 'home_services' %}
+                        <i class="bi bi-house"></i>
+                    {% elif category.value == 'education' %}
+                        <i class="bi bi-book"></i>
+                    {% elif category.value == 'health_wellness' %}
+                        <i class="bi bi-heart-pulse"></i>
+                    {% elif category.value == 'salon_beauty' %}
+                        <i class="bi bi-scissors"></i>
+                    {% elif category.value == 'fitness' %}
+                        <i class="bi bi-trophy"></i>
+                    {% elif category.value == 'business' %}
+                        <i class="bi bi-briefcase"></i>
+                    {% elif category.value == 'technology' %}
+                        <i class="bi bi-laptop"></i>
+                    {% else %}
+                        <i class="bi bi-grid"></i>
+                    {% endif %}
+                </div>
+                <h3>{{ category.label }}</h3>
+                <p>{{ category.count }} service{{ category.count|pluralize }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Featured Services Section -->
+{% if featured_services %}
+<section class="featured-section">
+    <div class="container">
+        <h2>Featured Services</h2>
+        <p class="section-subtitle">Handpicked services from top-rated providers</p>
+
+        <div class="services-grid">
+            {% for service in featured_services %}
+            <div class="service-card-new">
+                <!-- Category Header with Gradient Background -->
+                <div class="category-header">
+                    <div class="category-pill">
+                        <i class="bi bi-star-fill me-1"></i>
+                        {{ service.get_category_display|upper }}
+                    </div>
+                </div>
+
+                <!-- Card Content -->
+                <div class="card-content">
+                    <!-- Service Title -->
+                    <h3 class="service-title-new">{{ service.name }}</h3>
+
+                    <!-- Provider Badge -->
+                    <div class="provider-badge-new">
+                        <i class="bi bi-person-circle"></i>
+                        <span>{{ service.provider.get_full_name|default:service.provider.username }}</span>
+                    </div>
+
+                    <!-- Description -->
+                    <p class="service-desc-new">{{ service.description|truncatewords:12 }}</p>
+
+                    <!-- Meta Info Box -->
+                    <div class="meta-box">
+                        <div class="meta-row">
+                            <i class="bi bi-clock-fill"></i>
+                            <span>{{ service.duration }} min</span>
+                        </div>
+                    </div>
+
+                    <!-- Price Section -->
+                    <div class="price-section-new">
+                        <span class="price-label-new">PRICE</span>
+                        <div class="price-amount-new">€{{ service.price }}</div>
+                    </div>
+
+                    <!-- View Availability Button -->
+                    <a href="{% url 'view_availability' service.id %}" class="btn-view-availability">
+                        View Availability
+                        <i class="bi bi-calendar-check ms-2"></i>
+                    </a>
+                </div>
             </div>
-        </form>
+            {% endfor %}
+        </div>
 
-        <!-- CTA BUTTONS -->
-        <div class="mt-3">
-            <a href="/providers/" class="btn btn-outline-primary me-2">
-                Browse Providers
-            </a>
-            <a href="/register/provider/" class="btn btn-outline-secondary">
-                Become a Provider
+        <div class="text-center mt-4">
+            <a href="{% url 'browse_providers' %}" class="btn-view-all">
+                View All Services <i class="bi bi-arrow-right ms-2"></i>
             </a>
         </div>
     </div>
+</section>
+{% endif %}
 
-    <!-- RIGHT IMAGE -->
-    <div class="col-md-6 text-center">
-        <img
-          src="https://cdn-icons-png.flaticon.com/512/3209/3209265.png"
-          alt="AI Booking"
-          class="img-fluid"
-          width="300"
-        >
-        <p class="text-muted mt-2 small">Powered by OpenAI</p>
-    </div>
+<!-- Features Section -->
+<section class="features-section" id="features">
+    <div class="container">
+        <h2>How It Works</h2>
 
-</div>
+        <div class="features-grid">
+            <!-- Feature 1 -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-search"></i>
+                </div>
+                <h3>Describe Your Need</h3>
+                <p>Tell us what service you're looking for. Our system will help you find the best service providers.</p>
+            </div>
 
-<!-- HOW IT WORKS -->
-<div class="row text-center mt-5">
-    <h3 class="fw-bold mb-4">How It Works</h3>
+            <!-- Feature 2 -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h3>Choose a Provider</h3>
+                <p>Compare and select the best provider. View ratings, reviews, and availability.</p>
+            </div>
 
-    <div class="col-md-4">
-        <div class="p-3">
-            <h5>Describe Your Need</h5>
-            <p class="text-muted">Tell us what service you’re looking for.</p>
+            <!-- Feature 3 -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <h3>Book Instantly</h3>
+                <p>Pick a time slot and confirm booking. Get instant confirmation and manage appointments.</p>
+            </div>
         </div>
     </div>
+</section>
 
-    <div class="col-md-4">
-        <div class="p-3">
-            <h5>Choose a Provider</h5>
-            <p class="text-muted">Compare and select the best provider.</p>
-        </div>
+<!-- Auth Section -->
+<section class="auth-section">
+    <h2>Ready to Get Started?</h2>
+    <p class="subtitle">Join thousands of users finding the perfect service providers</p>
+
+    <div class="auth-buttons">
+        <a href="{% url 'login' %}" class="btn-auth btn-login-big">
+            <i class="bi bi-box-arrow-in-right"></i> Login
+        </a>
+        <a href="{% url 'index' %}" class="btn-auth btn-register-big">
+            <i class="bi bi-person-plus"></i> Register
+        </a>
     </div>
 
-    <div class="col-md-4">
-        <div class="p-3">
-            <h5> Book Instantly</h5>
-            <p class="text-muted">Pick a time slot and confirm booking.</p>
-        </div>
+    <div class="powered-by">
+        <p>
+            <i class="bi bi-shield-check"></i> Secure and easy registration process
+        </p>
     </div>
-</div>
+</section>
+{% endblock %}
 
+{% block extra_js %}
+<script>
+// Simple smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        var target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+});
+</script>
 {% endblock %}
