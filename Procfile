@@ -1,1 +1,1 @@
-web: gunicorn booking_system.wsgi
+web: gunicorn booking_system.wsgi --bind 0.0.0.0:$PORT
