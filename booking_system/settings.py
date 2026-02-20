@@ -30,6 +30,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # for deployment
 ]
 
 ROOT_URLCONF = 'booking_system.urls'
@@ -98,3 +99,6 @@ MESSAGE_TAGS = {
 # Session
 SESSION_COOKIE_AGE = 86400
 SESSION_SAVE_EVERY_REQUEST = True
+
+# static file deploy
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
