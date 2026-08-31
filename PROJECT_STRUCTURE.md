@@ -1,234 +1,95 @@
-# Project Structure Documentation
+# Project Structure
 
-This document describes the reorganized structure of the Simple Booking System Django project.
-
-## Overview
-
-The project has been restructured to use **global static files** and **global templates**, following Django best practices. This makes the codebase more maintainable, reduces duplication, and provides a consistent look and feel across the application.
-
-## Directory Structure
+Global static files and templates are shared across both apps, following Django best practices — one place to update styling, no duplication.
 
 ```
-Simple-booking-system/
-├── static/                          # Global static files
-│   ├── css/
-│   │   ├── base.css                # Styles for public pages (login, register, index)
-│   │   └── dashboard.css           # Styles for dashboard/authenticated pages
-│   ├── js/
-│   │   └── main.js                 # Global JavaScript functionality
-│   └── images/                     # Global images (logo, icons, etc.)
-│
-├── templates/                       # Global templates
-│   ├── base.html                   # Base template for public pages
-│   ├── dashboard_base.html         # Base template for dashboard pages
-│   └── login.html                  # Login page template
-│
-├── accounts/                        # Accounts app
-│   └── templates/accounts/         # App-specific templates
-│       ├── index.html              # Landing/home page
-│       ├── register.html           # Registration form
-│       ├── dashboard.html          # User dashboard
-│       └── success.html            # Success page
-│
-├── bookings/                        # Bookings app
-│   └── templates/bookings/         # App-specific templates
-│       └── add_availability.html   # Add availability form
-│
-└── booking_system/                  # Project settings
-    └── settings.py                 # Django settings (configured for global static/templates)
+smart-service-booking-system/
+├── manage.py
+├── requirements.txt
+├── booking_system/            # Project settings, root URLs
+├── accounts/                   # Auth, dashboards, superadmin
+│   ├── models.py              # UserProfile
+│   ├── views.py                # register, login, dashboard, superadmin_*
+│   └── urls.py
+├── bookings/                    # Marketplace logic
+│   ├── models.py               # ProviderProfile, Service, Availability,
+│   │                            # Booking, Notification, SearchQuery
+│   ├── views.py
+│   ├── signals.py              # auto-creates notifications on booking events
+│   └── urls.py
+├── templates/
+│   ├── base.html               # public pages (login, register, home)
+│   ├── dashboard_base.html     # authenticated pages (sidebar layout)
+│   ├── accounts/
+│   ├── bookings/
+│   └── superadmin/
+└── static/
+    ├── css/                    # base.css, dashboard.css, + per-page CSS
+    └── js/main.js
 ```
 
-## Static Files Organization
+## Templates
 
-### CSS Files
+Two base templates, extended by everything else:
 
-1. **base.css** - Public pages styling
-   - Login page
-   - Registration pages
-   - Landing page
-   - Includes: gradient backgrounds, card styles, form styles, button styles
-
-2. **dashboard.css** - Dashboard styling
-   - Sidebar navigation
-   - Dashboard header
-   - Stats cards
-   - Main content sections
-   - Tables and data displays
-   - Responsive design for mobile
-
-### JavaScript Files
-
-1. **main.js** - Global JavaScript functionality
-   - Mobile menu toggle
-   - Active menu item highlighting
-   - Form validation helpers
-   - Toast notifications
-   - Date picker enhancements
-   - Auto-dismiss alerts
-
-## Templates Organization
-
-### Global Templates
-
-1. **base.html** - Base template for public pages
-   - Used by: index, register, login
-   - Includes: Bootstrap, Bootstrap Icons, Google Fonts, global CSS
-   - Blocks: `title`, `extra_css`, `header_subtitle`, `content`, `extra_js`
-
-2. **dashboard_base.html** - Base template for authenticated pages
-   - Used by: dashboard, add_availability
-   - Includes: Sidebar navigation, dashboard header, user info
-   - Blocks: `title`, `extra_css`, `page_title`, `page_subtitle`, `header_actions`, `dashboard_content`, `extra_js`
-
-3. **login.html** - Standalone login page
-   - Extends base.html
-   - Custom styled login form with account type selector
-
-### App-Specific Templates
-
-Templates in app directories extend the global base templates:
-
-- **accounts/index.html** - Extends `base.html`
-- **accounts/register.html** - Extends `base.html`
-- **accounts/dashboard.html** - Extends `dashboard_base.html`
-- **bookings/add_availability.html** - Extends `dashboard_base.html`
-
-## How to Use
-
-### Creating a New Public Page
+- **`base.html`** — public pages. Blocks: `title`, `extra_css`, `header_subtitle`, `content`, `extra_js`.
+- **`dashboard_base.html`** — authenticated pages (sidebar nav). Blocks: `title`, `extra_css`, `page_title`, `page_subtitle`, `header_actions`, `dashboard_content`, `extra_js`.
 
 ```html
 {% extends 'base.html' %}
-{% load static %}
-
-{% block title %}My Page Title{% endblock %}
-
-{% block extra_css %}
-<style>
-    /* Page-specific styles */
-</style>
-{% endblock %}
-
-{% block content %}
-    <!-- Your page content here -->
-{% endblock %}
+{% block content %}...{% endblock %}
 ```
-
-### Creating a New Dashboard Page
 
 ```html
 {% extends 'dashboard_base.html' %}
-
-{% block title %}Dashboard Page{% endblock %}
-
-{% block page_title %}Welcome to My Page{% endblock %}
-
-{% block page_subtitle %}Subtitle text here{% endblock %}
-
-{% block dashboard_content %}
-    <!-- Your dashboard content here -->
-{% endblock %}
+{% block dashboard_content %}...{% endblock %}
 ```
 
-### Adding Custom CSS
+## Static Files
 
-For page-specific styles, use the `extra_css` block:
+- CSS → `static/css/`, JS → `static/js/`, images → `static/images/`
+- Reference with `{% load static %}` and `{% static 'css/base.css' %}`
+- Before deploying: `python manage.py collectstatic`
 
-```html
-{% block extra_css %}
-<style>
-    .custom-class {
-        /* Your custom styles */
-    }
-</style>
-{% endblock %}
-```
-
-### Adding Custom JavaScript
-
-For page-specific JavaScript, use the `extra_js` block:
-
-```html
-{% block extra_js %}
-<script>
-    // Your custom JavaScript
-</script>
-{% endblock %}
-```
-
-## Configuration
-
-### settings.py
-
-The following settings enable global static files and templates:
+## Settings
 
 ```python
-# Templates configuration
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Global templates directory
-        'APP_DIRS': True,
-        # ... other settings
-    },
-]
-
-# Static files configuration
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',  # Global static files directory
-]
+TEMPLATES = [{'DIRS': [BASE_DIR / 'templates'], 'APP_DIRS': True, ...}]
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 ```
 
-## Benefits of This Structure
+`SECRET_KEY` comes from the `DJANGO_SECRET_KEY` env var (falls back to a placeholder locally). `ALLOWED_HOSTS` / `CSRF_TRUSTED_ORIGINS` are set for the Render domain — update them if you deploy elsewhere.
 
-1. **No Code Duplication** - CSS and JS are in one place
-2. **Consistent Design** - All pages use the same base styles
-3. **Easy Maintenance** - Update styles globally from one location
-4. **Better Organization** - Clear separation between global and app-specific files
-5. **Scalability** - Easy to add new apps and pages
-6. **Django Best Practices** - Follows Django's recommended project structure
+## App Responsibilities
 
-## Development Workflow
+| App | Owns |
+|---|---|
+| `accounts` | Login/registration, `UserProfile` (role: user/provider/superadmin), dashboards, superadmin panel |
+| `bookings` | Everything marketplace-related — services, availability, bookings, notifications, search logging |
 
-### Collecting Static Files for Production
+## "I want to change X" — where to look
 
-Before deploying to production, run:
+| Task | Edit |
+|---|---|
+| Add/change a page's HTML | `templates/accounts/` or `templates/bookings/` (extend a base template — see above) |
+| Add a URL | app's `urls.py`, then wire it to a view in that app's `views.py` |
+| Add/change a database field | app's `models.py`, then `python manage.py makemigrations && migrate` |
+| Change global styling | `static/css/base.css` (public pages) or `static/css/dashboard.css` (authenticated pages) |
+| Auto-fire something on a booking event | `bookings/signals.py` |
+| Restrict a view to superadmins only | wrap it with `@superadmin_required` (defined in `accounts/views.py`) |
 
+## Common Workflows
+
+**Add a field to an existing model**
 ```bash
-python manage.py collectstatic
+# 1. Add the field in models.py
+# 2. Generate and apply the migration
+python manage.py makemigrations
+python manage.py migrate
 ```
 
-This collects all static files into the `staticfiles` directory.
-
-### Adding New Static Files
-
-1. Add CSS files to `static/css/`
-2. Add JS files to `static/js/`
-3. Add images to `static/images/`
-4. Reference in templates using `{% static 'path/to/file' %}`
-
-### Creating New Pages
-
-1. Create template in appropriate location:
-   - Public pages → Extend `base.html`
-   - Dashboard pages → Extend `dashboard_base.html`
-2. Add view in the appropriate app's `views.py`
-3. Add URL pattern in the app's `urls.py`
-
-## Notes
-
-- Always use `{% load static %}` at the top of templates that use static files
-- The `static/images/` directory is ready for logos, icons, and other images
-- Mobile responsiveness is built into the CSS
-- Bootstrap 5 and Bootstrap Icons are loaded via CDN
-- Google Fonts (Inter) is used for dashboard pages
-
-## Next Steps
-
-Consider adding:
-- Custom 404/500 error pages in the global templates directory
-- Additional CSS files for specific features (e.g., `forms.css`, `tables.css`)
-- JavaScript modules for complex functionality
-- Image assets (logo, favicon, etc.)
+**Add a new page**
+1. Create the template, extending `base.html` (public) or `dashboard_base.html` (authenticated).
+2. Add the view function in the app's `views.py`.
+3. Register the path in the app's `urls.py`.
